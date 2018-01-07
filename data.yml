@@ -1,0 +1,119 @@
+AutoScaling:
+      Scaling1:
+        LaunchConfiguration:
+           LaunchConfigurationName: "Testing-QA"
+           ImageId: "ami-d47182ac"
+           KeyName: "prajjwalkey"
+           instanceType: 't2.micro'
+           DeviceName: '/dev/sda1'
+           VirtualName: 'prajjwal1'
+           DeleteOnTermination: True
+           VolumeType: 'gp2'
+           VolumeSize: 10
+           SnapshotId: 'snap-0cddb5d838b5d5039'
+           SecurityGroups:
+                   - ec2-sg2
+        AutoScalingGroup:
+           GroupName: "Testing"
+           VPCZoneIdentifier: "Subnet-e914bc8f,subnet-12f38c49,subnet-011cd549"
+           LoadBalancer:
+                  - Apache2-QA
+           MinSize: 2
+           MaxSize: 10
+           AvailabilityZone:
+                - us-west-2c
+                - us-west-2b
+                - us-west-2a
+LoadBalancer:
+      Balancer1:
+        LoadBalancerName: "Apache2-QA"
+        SecurityGroups:
+              - ec2-lb2
+        Tags:
+            - key:
+              value:
+        AvailabilityZone:
+            - us-west-2c
+            - us-west-2b
+            - us-west-2a
+        HealthCheck:
+               Target: 'HTTP:80/index.html'
+               Interval: 30
+               Timeout: 5
+               UnhealthyThreshold: 10
+               HealthyThreshold: 10
+        Listeners:
+            listener1:
+                Protocol: 'HTTP'
+                LoadBalancerPort: 80
+                InstanceProtocol: 'HTTP'
+                InstancePort: 8080
+            listener2:
+                Protocol: 'HTTPS'
+                LoadBalancerPort: 443
+                InstanceProtocol: 'HTTP'
+                InstancePort: 8080
+                SSLCertificateId: "arn:aws:acm:us-west-2:026415828610:certificate/21951ee1-c251-44ab-b182-2db75dca1702"
+SecurityGroups:
+      Group1:
+          name: 'ec2-lb2'
+          description: "This is a test"
+          mappings:
+           inBound_mapping:
+              mapping1:
+                IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                IpRanges: "0.0.0.0/0"
+              mapping2:
+                IpProtocol: tcp
+                FromPort: 443
+                ToPort: 443
+                IpRanges: "0.0.0.0/0"
+              mapping3:
+                IpProtocol: tcp
+                FromPort: 8080
+                ToPort: 8080
+                IpRanges: "0.0.0.0/0"
+           outBound_mapping:
+              mapping1:
+                IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                IpRanges: "ec2-sg2"
+              mapping2:
+                IpProtocol: tcp
+                FromPort: 8080
+                ToPort: 8080
+                IpRanges: "ec2-sg2"
+      Group2:
+          name: 'ec2-sg2'
+          description: "This is a test"
+          mappings:
+           inBound_mapping:
+              mapping1:
+                IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                IpRanges: "ec2-lb2"
+              mapping2:
+                IpProtocol: tcp
+                FromPort: 8080
+                ToPort: 8080
+                IpRanges: "ec2-lb2"
+              mapping3:
+                IpProtocol: tcp
+                FromPort: 22
+                ToPort: 22
+                IpRanges: "0.0.0.0/0"
+           outBound_mapping:
+              mapping1:
+                IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                IpRanges: "0.0.0.0/0"
+              mapping2:
+                IpProtocol: tcp
+                FromPort: 8080
+                ToPort: 8080
+                IpRanges: "0.0.0.0/0"

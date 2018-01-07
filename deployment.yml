@@ -1,0 +1,31 @@
+---
+  - hosts: key_prajjwalkey_{{ ENVR }} # Please change this key based on what you have used to create instances.
+    user: ubuntu
+    sudo: yes
+    vars:
+      Env_Name: "{{ ENVR }}"
+      Version: "{{ Version }}"
+      Storage: "/Users/prajjavalgupta/Desktop/boeing/storage"
+
+    tasks:
+      - name: Removing the old package
+        shell: "rm /home/ubuntu/apache-tomcat-7.0.81/webapps/*.war"
+
+      - name: Update all packages to latest
+        copy:
+            src: "{{ item }}"
+            dest: "/home/ubuntu/apache-tomcat-7.0.81/webapps"
+        with_items:
+             - "{{Storage}}/{{Version}}/*.war"
+             - restart.sh
+
+      - name: changing the permission
+        shell: "chmod +x /home/ubuntu/apache-tomcat-7.0.81/webapps/restart.sh"
+        notify: Restarting tomcat
+
+
+    handlers:
+        - name: Restarting tomcat
+          shell: "/home/ubuntu/apache-tomcat-7.0.81/webapps/restart.sh"
+          args:
+              chdir: /home/ubuntu/apache-tomcat-7.0.81/webapps
